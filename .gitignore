@@ -1,0 +1,6 @@
+# Java bits
+*.class
+/target
+
+# VSCode bits
+/.vscode
