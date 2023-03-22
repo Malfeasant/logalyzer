@@ -1,7 +1,6 @@
 package us.malfeasant.logalyzer;
 
 import java.io.File;
-import java.nio.file.Path;
 import java.util.List;
 
 import org.tinylog.Logger;
