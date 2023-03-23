@@ -1,6 +1,8 @@
 package us.malfeasant.logalyzer;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.tinylog.Logger;
@@ -23,21 +25,34 @@ import javafx.stage.Stage;
  */
 public class App extends Application {
     private final Scene scene;
-    private Stage stage;
+    private Stage stage; // this is needed for modal dialogs...
 
     public App() {
-        MenuItem open = new MenuItem("Open...");
-        Menu file = new Menu("File");
-        file.getItems().addAll(open);
-        MenuBar menuBar = new MenuBar(file);
-        open.setOnAction(e -> fileOpen(e));
-
         Label label = new Label(System.getProperty("java.version"));
         BorderPane pane = new BorderPane(label);
         pane.setOnDragOver(e -> handleDragOver(e));
         pane.setOnDragDropped(e -> handleDrop(e));
-        pane.setTop(menuBar);
+        pane.setTop(createMenu());
         scene = new Scene(pane);
+    }
+
+    private MenuBar createMenu() {
+        MenuItem open = new MenuItem("Open...");
+        Menu file = new Menu("File");
+        file.getItems().addAll(open);
+        MenuBar menuBar = new MenuBar(file);
+        open.setOnAction(e -> showChooser(e));
+        return menuBar;
+    }
+
+    private void showChooser(ActionEvent event) {
+        var chooser = new FileChooser();
+        chooser.setTitle("Open S4 Log File(s)");
+        var files = chooser.showOpenMultipleDialog(stage);
+
+        if (!files.isEmpty()) {
+            open(files);
+        }
     }
 
     private void handleDragOver(DragEvent event) {
@@ -48,28 +63,27 @@ public class App extends Application {
         }
     }
 
-    private void fileOpen(ActionEvent event) {
-        var chooser = new FileChooser();
-        chooser.setTitle("Open S4 Log File(s)");
-        var files = chooser.showOpenMultipleDialog(stage);
-
-        if (!files.isEmpty()) {
-            open(files);
-        }
-    }
-
     private void handleDrop(DragEvent event) {
         var db = event.getDragboard();
         if (db.hasFiles()) {
             event.setDropCompleted(true);
             event.consume();
-            Logger.info("File " + db.getFiles() + " dropped.");
+            Logger.info("Files dropped: " + db.getFiles());
             open(db.getFiles());
         } // TODO else if? Can we drop Strings? Folder?
         else Logger.warn("Can't handle this drop: " + db.getContentTypes());
     }
 
+    private final List<S4LogFile> logFiles = new ArrayList<>();
     private void open(List<File> files) {
+        logFiles.clear();
+        for (var file : files) {
+            try {
+                logFiles.add(new S4LogFile(file.toPath()));
+            } catch (IOException e) {
+                // TODO: handle exception- probably just log it and reset UI?
+            }
+        }
         // TODO
     }
 
@@ -83,5 +97,4 @@ public class App extends Application {
     public static void main(String[] args) {
         launch();
     }
-
 }
