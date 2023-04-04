@@ -74,17 +74,22 @@ public class App extends Application {
         else Logger.warn("Can't handle this drop: " + db.getContentTypes());
     }
 
-    private final List<S4LogFile> logFiles = new ArrayList<>();
+    private List<S4LogFile> logFiles;
     private void open(List<File> files) {
-        logFiles.clear();
+        logFiles = new ArrayList<>();
         for (var file : files) {
+            S4LogFile s4log = null;
             try {
-                logFiles.add(new S4LogFile(file.toPath()));
+                Logger.debug("Adding file " + file);
+                s4log = new S4LogFile(file.toPath());
             } catch (IOException e) {
                 // TODO: handle exception- probably just log it and reset UI?
             }
+            if (s4log != null) {
+                logFiles.add(s4log);
+                s4log.populateDevices();
+            }
         }
-        // TODO
     }
 
     @Override

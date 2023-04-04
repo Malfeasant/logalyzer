@@ -9,6 +9,10 @@ public class CashDevice {
     private final String deviceIp;
     private final Optional<String> normIp;
 
+    /**
+     * Pass in the log file, and the line from that file which details
+     * this device.
+     */
     CashDevice(S4LogFile file, String deviceLine) {
         if (file == null || deviceLine == null) {
             throw new IllegalArgumentException(
@@ -17,6 +21,10 @@ public class CashDevice {
         }
         this.file = file;
 
-        
+        // TODO
+        deviceId = "";
+        hasNorm = false;
+        deviceIp = "";
+        normIp = Optional.empty();
     }
 }
