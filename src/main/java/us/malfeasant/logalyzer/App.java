@@ -81,13 +81,18 @@ public class App extends Application {
             S4LogFile s4log = null;
             try {
                 Logger.debug("Adding file " + file);
-                s4log = new S4LogFile(file.toPath());
+                s4log = new S4LogFile(file);
             } catch (IOException e) {
                 // TODO: handle exception- probably just log it and reset UI?
             }
             if (s4log != null) {
                 logFiles.add(s4log);
-                s4log.populateDevices();
+                try {
+                    Logger.debug("Calling populateDevices() on {}...", s4log);
+                    s4log.populateDevices();
+                } catch (IOException e) {
+                    Logger.error(e, "File {} has a problem.", s4log);
+                }
             }
         }
     }
