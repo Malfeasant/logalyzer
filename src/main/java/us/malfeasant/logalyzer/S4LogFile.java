@@ -7,8 +7,8 @@ import java.io.RandomAccessFile;
 
 import org.tinylog.Logger;
 
-import javafx.beans.property.ListProperty;
-import javafx.beans.property.SimpleListProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 /**
  * Represents a single S4 log file- performs analysis and holds statistics
@@ -17,8 +17,8 @@ import javafx.beans.property.SimpleListProperty;
 public class S4LogFile {
     private final File file;
 
-    final ListProperty<CashDevice> devices = new SimpleListProperty<>();
-    
+    final ObservableList<CashDevice> devices = FXCollections.observableArrayList();
+
     public S4LogFile(File file) throws FileNotFoundException {
         this.file = file;
         if (!file.isFile()) {
@@ -32,7 +32,6 @@ public class S4LogFile {
             for (var line = raf.readLine(); line != null; line = raf.readLine()) {
                 if (line.contains(", Device - ")) {
                     devices.add(new CashDevice(this, line));
-                    Logger.debug("Added device line: {}", line);
                 }
             }
         }
