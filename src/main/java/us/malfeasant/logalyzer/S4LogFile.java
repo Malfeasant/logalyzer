@@ -9,6 +9,7 @@ import org.tinylog.Logger;
 
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 
@@ -48,8 +49,18 @@ public class S4LogFile {
                 return count;
             }
         };
-        // TODO- an Executor?  a Thread? something needs to run the task...
+        task.setOnSucceeded(e -> {
+            Logger.debug("Added " + devices.size() + " devices.");
+        });
+        devices.addListener((ListChangeListener.Change<? extends CashDevice> c) -> {
+            c.next();
+            Logger.debug(c.getAddedSubList());
+        });
+        Thread th = new Thread(task);
+        th.setDaemon(true);
+        th.start();
+        // TODO- an Executor?  Seems like a service would be best- keep the same thread running,
+        // just the task changes...
 
-        Logger.debug("Added " + devices.size() + " devices.");
     }
 }
