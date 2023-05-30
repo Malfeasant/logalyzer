@@ -10,6 +10,7 @@ import org.tinylog.Logger;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.scene.Scene;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
@@ -26,10 +27,12 @@ import javafx.stage.Stage;
 public class App extends Application {
     private final Scene scene;
     private Stage stage; // this is needed for modal dialogs...
+    private final ChoiceBox<CashDevice> machineList = new ChoiceBox<>();
 
     public App() {
-        Label label = new Label(System.getProperty("java.version"));
+        Label label = new Label(System.getProperty("java.version")); // TODO something more useful
         BorderPane pane = new BorderPane(label);
+        pane.setLeft(machineList);
         pane.setOnDragOver(e -> handleDragOver(e));
         pane.setOnDragDropped(e -> handleDrop(e));
         pane.setTop(createMenu());
@@ -86,6 +89,7 @@ public class App extends Application {
                 // TODO: handle exception- probably just log it and reset UI?
             }
             if (s4log != null) {
+                machineList.itemsProperty().set(s4log.devices);
                 logFiles.add(s4log);
                 try {
                     Logger.debug("Calling populateDevices() on {}...", s4log);
