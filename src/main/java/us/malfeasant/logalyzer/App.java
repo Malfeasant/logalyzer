@@ -10,14 +10,15 @@ import org.tinylog.Logger;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.scene.Scene;
-import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
@@ -27,12 +28,15 @@ import javafx.stage.Stage;
 public class App extends Application {
     private final Scene scene;
     private Stage stage; // this is needed for modal dialogs...
-    private final ChoiceBox<CashDevice> machineList = new ChoiceBox<>();
+
+    private final ListView<Client> clientList = new ListView<>();
+    private final ListView<CashDevice> machineList = new ListView<>();
 
     public App() {
         Label label = new Label(System.getProperty("java.version")); // TODO something more useful
         BorderPane pane = new BorderPane(label);
-        pane.setLeft(machineList);
+        var leftBox = new VBox(clientList, machineList);
+        pane.setLeft(leftBox);
         pane.setOnDragOver(e -> handleDragOver(e));
         pane.setOnDragDropped(e -> handleDrop(e));
         pane.setTop(createMenu());
@@ -89,6 +93,7 @@ public class App extends Application {
                 // TODO: handle exception- probably just log it and reset UI?
             }
             if (s4log != null) {
+                CashDevice.setCellFactory(machineList);
                 machineList.itemsProperty().set(s4log.devices);
                 logFiles.add(s4log);
                 try {

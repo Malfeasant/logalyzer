@@ -20,6 +20,7 @@ import javafx.concurrent.Task;
 public class S4LogFile {
     private final File file;
 
+    final ObservableList<Client> clients = FXCollections.observableArrayList();
     final ObservableList<CashDevice> devices = FXCollections.observableArrayList();
 
     public S4LogFile(File file) throws FileNotFoundException {
@@ -38,6 +39,7 @@ public class S4LogFile {
                 try (var raf = new RandomAccessFile(file, "r")) {
                     for (var line = raf.readLine(); line != null; line = raf.readLine()) {
                         if (line.contains(", Device - ")) {
+                            // TODO handle clients
                             var dev = new CashDevice(S4LogFile.this, line);
                             Platform.runLater(() -> {
                                 devices.add(dev);
