@@ -5,7 +5,7 @@ import org.tinylog.Logger;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 
-public class CashDevice {
+public class CashDevice extends Thing {
     private final S4LogFile file;
     private final String deviceId;
     private final String deviceIp;
@@ -15,6 +15,8 @@ public class CashDevice {
      * this device.
      */
     CashDevice(S4LogFile file, String deviceLine) {
+        super(Type.DEVICE);
+        
         if (file == null || deviceLine == null) {
             throw new IllegalArgumentException(
                 "CashDevice constructor called with nulls.  Bad."

@@ -6,10 +6,12 @@ import javafx.scene.control.ListView;
 /**
  * Some log files can have multiple clients- ShareOne most notably.  This class represents a client.
  */
-public class Client {
+public class Client extends Thing {
     private final String name;
 
     public Client(String name) {
+        super(Type.CLIENT);
+        
         if (name == null) throw new IllegalArgumentException("Client constructed with nulls.");
         this.name = name;
     }
