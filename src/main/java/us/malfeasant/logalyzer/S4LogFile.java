@@ -4,7 +4,11 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.Consumer;
+
+import org.tinylog.Logger;
 
 import javafx.application.Platform;
 import javafx.concurrent.Task;
@@ -17,7 +21,7 @@ public class S4LogFile extends Thing {
     private final File file;
 
     public S4LogFile(File file) throws FileNotFoundException {
-        super(Type.FILE);
+        super(Type.FILE, file.getName());
 
         this.file = file;
         if (!file.isFile()) {
@@ -33,10 +37,15 @@ public class S4LogFile extends Thing {
             protected Integer call() throws Exception {
                 int count = 0;
                 try (var raf = new RandomAccessFile(file, "r")) {
+                    var clientSet = new HashSet<>();
                     for (var line = raf.readLine(); line != null; line = raf.readLine()) {
                         if (line.contains(", Device - ")) {
-                            // TODO handle clients
-                            var dev = new CashDevice(S4LogFile.this, line);
+                            var devLine = new DeviceLine(line);
+                            var client = devLine.client;
+                            if (clientSet.add(client)) {
+                                clients.accept(new Client(client));
+                            }
+                            var dev = new CashDevice(devLine);
                             Platform.runLater(() -> {
                                 devices.accept(dev);
                             });
@@ -44,6 +53,7 @@ public class S4LogFile extends Thing {
                         }
                     }
                 }
+                Logger.debug("Added {} devices.", count);
                 return count;
             }
         };
