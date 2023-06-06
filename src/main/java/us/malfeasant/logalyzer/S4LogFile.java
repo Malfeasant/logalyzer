@@ -5,7 +5,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.HashSet;
-import java.util.Set;
 import java.util.function.Consumer;
 
 import org.tinylog.Logger;
@@ -17,7 +16,7 @@ import javafx.concurrent.Task;
  * Represents a single S4 log file- performs analysis and holds statistics
  * Should be able to handle files over a gig (it can happen)
  */
-public class S4LogFile extends Thing {
+public class S4LogFile extends LogComponent {
     private final File file;
 
     public S4LogFile(File file) throws FileNotFoundException {

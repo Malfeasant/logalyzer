@@ -1,6 +1,6 @@
 package us.malfeasant.logalyzer;
 
-public abstract class Thing {
+public abstract class LogComponent {
     protected enum Type {
         FILE, CLIENT, DEVICE;
     }
@@ -8,10 +8,10 @@ public abstract class Thing {
     protected final String name;
     protected final Type type;
 
-    protected Thing(Type t, String n) {
+    protected LogComponent(Type t, String n) {
         // This should never happen, but just to make sure-
         if (t == null) throw new NullPointerException(
-            "Constructed " + Thing.class.getSimpleName() + " with a null type.");
+            "Constructed " + LogComponent.class.getSimpleName() + " with a null type.");
         type = t;
         name = n;
     }

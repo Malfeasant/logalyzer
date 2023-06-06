@@ -1,6 +1,6 @@
 package us.malfeasant.logalyzer;
 
-public class CashDevice extends Thing {
+public class CashDevice extends LogComponent {
     private final String deviceIp;
     
     CashDevice(DeviceLine line) {

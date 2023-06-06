@@ -33,7 +33,7 @@ public class App extends Application {
 
     //private final ListView<Client> clientList = new ListView<>();
     //private final ListView<CashDevice> machineList = new ListView<>();
-    private final TreeView<Thing> deviceTree = new TreeView<>();
+    private final TreeView<LogComponent> deviceTree = new TreeView<>();
 
     public App() {
         Label label = new Label(System.getProperty("java.version")); // TODO something more useful
@@ -85,20 +85,20 @@ public class App extends Application {
     }
 
     private void open(List<File> files) {
-        TreeItem<Thing> root = new TreeItem<Thing>(null);
+        TreeItem<LogComponent> root = new TreeItem<LogComponent>(null);
         deviceTree.setRoot(root);
         deviceTree.setShowRoot(false);
         for (var f : files) {
             try {
                 var logFile = new S4LogFile(f);
-                var item = new TreeItem<Thing>(logFile);
+                var item = new TreeItem<LogComponent>(logFile);
                 root.getChildren().add(item);
                 try {
                     logFile.populateDevices(
                         c -> {
                             // TODO
                         }, d -> {
-                            item.getChildren().add(new TreeItem<Thing>(d));
+                            item.getChildren().add(new TreeItem<LogComponent>(d));
                         });
                 } catch (IOException e) {
                     // TODO Auto-generated catch block
