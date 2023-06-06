@@ -8,4 +8,9 @@ public class Client extends LogComponent {
     public Client(String name) {
         super(Type.CLIENT, name);
     }
+
+    @Override
+    public String prettyPrint() {
+        return "Client: " + name;
+    }
 }

@@ -8,4 +8,9 @@ public class CashDevice extends LogComponent {
         
         deviceIp = line.deviceIp;
     }
+
+    @Override
+    public String prettyPrint() {
+        return "Device: " + name;
+    }
 }

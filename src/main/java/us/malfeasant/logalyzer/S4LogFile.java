@@ -4,8 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.util.HashSet;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 
 import org.tinylog.Logger;
 
@@ -29,24 +28,25 @@ public class S4LogFile extends LogComponent {
         // TODO sanity checks? Make sure it's an S4 log file?
     }
 
-    void populateDevices(Consumer<Client> clients, Consumer<CashDevice> devices)
+    @Override
+    public String prettyPrint() {
+        return "File: " + file.getName();
+    }
+
+    void populateDevices(BiConsumer<String, CashDevice> clientDevices)
         throws IOException {
         Task<Integer> task = new Task<>() {
             @Override
             protected Integer call() throws Exception {
                 int count = 0;
                 try (var raf = new RandomAccessFile(file, "r")) {
-                    var clientSet = new HashSet<>();
                     for (var line = raf.readLine(); line != null; line = raf.readLine()) {
                         if (line.contains(", Device - ")) {
                             var devLine = new DeviceLine(line);
                             var client = devLine.client;
-                            if (clientSet.add(client)) {
-                                clients.accept(new Client(client));
-                            }
                             var dev = new CashDevice(devLine);
                             Platform.runLater(() -> {
-                                devices.accept(dev);
+                                clientDevices.accept(client, dev);
                             });
                             ++count;
                         }

@@ -3,6 +3,7 @@ package us.malfeasant.logalyzer;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 
 import org.tinylog.Logger;
@@ -44,6 +45,7 @@ public class App extends Application {
         pane.setOnDragDropped(e -> handleDrop(e));
         pane.setTop(createMenu());
         scene = new Scene(pane);
+        deviceTree.setCellFactory(LogComponent.getCellFactory());
     }
 
     private MenuBar createMenu() {
@@ -91,15 +93,24 @@ public class App extends Application {
         for (var f : files) {
             try {
                 var logFile = new S4LogFile(f);
-                var item = new TreeItem<LogComponent>(logFile);
-                root.getChildren().add(item);
+                TreeItem<LogComponent> fileItem = new TreeItem<LogComponent>(logFile);
+                root.getChildren().add(fileItem);
+                var clients = new HashMap<String, TreeItem<LogComponent>>();  // map of client name to its TreeItem
                 try {
-                    logFile.populateDevices(
-                        c -> {
-                            // TODO
+                    logFile.populateDevices((c, d) -> {
+                        // Make sure client added only once
+                        TreeItem<LogComponent> clientItem = clients.get(c);
+                        if (clientItem == null) {
+                            clientItem = new TreeItem<>(new Client(c));
+                            clients.put(c, clientItem);
+                            fileItem.getChildren().add(clientItem);
+                        }
+                        clientItem.getChildren().add(new TreeItem<LogComponent>(d));
+/*                        c -> {
+                            item.getChildren().add(new TreeItem<LogComponent>(c));
                         }, d -> {
-                            item.getChildren().add(new TreeItem<LogComponent>(d));
-                        });
+                            //item.getChildren().add(new TreeItem<LogComponent>(d));
+*/                        });
                 } catch (IOException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
@@ -110,28 +121,6 @@ public class App extends Application {
                     "File " + f + " could not be opened.").showAndWait();
             }
         }
-
-/*        logFiles = new ArrayList<>();
-        for (var file : files) {
-            S4LogFile s4log = null;
-            try {
-                Logger.debug("Adding file " + file);
-                s4log = new S4LogFile(file);
-            } catch (IOException e) {
-                // TODO: handle exception- probably just log it and reset UI?
-            }
-            if (s4log != null) {
-//                CashDevice.setCellFactory(machineList);
-//                machineList.itemsProperty().set(s4log.devices);
-                logFiles.add(s4log);
-                try {
-                    Logger.debug("Calling populateDevices() on {}...", s4log);
-                    s4log.populateDevices();
-                } catch (IOException e) {
-                    Logger.error(e, "File {} has a problem.", s4log);
-                }
-            }
-        }*/
     }
 
     @Override
