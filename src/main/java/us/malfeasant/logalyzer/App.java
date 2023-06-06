@@ -20,6 +20,7 @@ import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.input.DragEvent;
+import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.FileChooser;
@@ -32,14 +33,10 @@ public class App extends Application {
     private final Scene scene;
     private Stage stage; // this is needed for modal dialogs...
 
-    //private final ListView<Client> clientList = new ListView<>();
-    //private final ListView<CashDevice> machineList = new ListView<>();
     private final TreeView<LogComponent> deviceTree = new TreeView<>();
 
     public App() {
-        Label label = new Label(System.getProperty("java.version")); // TODO something more useful
-        BorderPane pane = new BorderPane(label);
-        //var leftBox = new VBox(clientList, machineList);
+        BorderPane pane = new BorderPane();
         pane.setLeft(deviceTree);
         pane.setOnDragOver(e -> handleDragOver(e));
         pane.setOnDragDropped(e -> handleDrop(e));
@@ -69,10 +66,21 @@ public class App extends Application {
 
     private void handleDragOver(DragEvent event) {
         var db = event.getDragboard();
-        if (db.hasFiles() || db.hasString()) {
+        if (hasFiles(db)) {
             event.acceptTransferModes(TransferMode.ANY);
             event.consume();
         }
+    }
+
+    private boolean hasFiles(Dragboard db) {
+        var anyFiles = false;
+        if (db.hasFiles()) {
+            for (var f : db.getFiles()) {
+                if (f.isDirectory()) return false;
+                else anyFiles = true;
+            }
+        }
+        return anyFiles;
     }
 
     private void handleDrop(DragEvent event) {

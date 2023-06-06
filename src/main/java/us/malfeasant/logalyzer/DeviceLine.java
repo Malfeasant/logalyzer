@@ -1,5 +1,8 @@
 package us.malfeasant.logalyzer;
 
+/**
+ * Helper class- makes it easier to build a CashDevice from its line of log text
+ */
 public class DeviceLine {
     public final String client;
     public final String deviceId;

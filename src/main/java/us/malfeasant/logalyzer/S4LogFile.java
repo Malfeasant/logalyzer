@@ -61,6 +61,6 @@ public class S4LogFile extends LogComponent {
         th.start();
         // TODO- an Executor?  Seems like a service would be best- keep the same thread running,
         // just the task changes...
-
+        // in fact as is right now this is ripe for race conditions
     }
 }
