@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 import org.tinylog.Logger;
 
@@ -33,20 +33,22 @@ public class S4LogFile extends LogComponent {
         return "File: " + file.getName();
     }
 
-    void populateDevices(BiConsumer<String, CashDevice> clientDevices)
-        throws IOException {
-        Task<Integer> task = new Task<>() {
+    void populateDevices(Consumer<DeviceLine> dlConsumer) throws IOException {
+        // To avoid bogging down the JavaFX event thread while the file is read and parsed,
+        // we use a single worker thread.
+        Exec.getService().submit(new Task<>() {
             @Override
-            protected Integer call() throws Exception {
+            protected Integer call() throws FileNotFoundException, IOException {
                 int count = 0;
                 try (var raf = new RandomAccessFile(file, "r")) {
                     for (var line = raf.readLine(); line != null; line = raf.readLine()) {
+                        if (isCancelled() || Thread.interrupted()) return -1;
+                        
                         if (line.contains(", Device - ")) {
                             var devLine = new DeviceLine(line);
-                            var client = devLine.client;
-                            var dev = new CashDevice(devLine);
+                            // Pass it back to Event thread
                             Platform.runLater(() -> {
-                                clientDevices.accept(client, dev);
+                                dlConsumer.accept(devLine);
                             });
                             ++count;
                         }
@@ -55,12 +57,6 @@ public class S4LogFile extends LogComponent {
                 Logger.debug("Added {} devices.", count);
                 return count;
             }
-        };
-        Thread th = new Thread(task);
-        th.setDaemon(true);
-        th.start();
-        // TODO- an Executor?  Seems like a service would be best- keep the same thread running,
-        // just the task changes...
-        // in fact as is right now this is ripe for race conditions
+        });
     }
 }

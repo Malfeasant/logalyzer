@@ -12,7 +12,6 @@ import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
@@ -105,20 +104,16 @@ public class App extends Application {
                 root.getChildren().add(fileItem);
                 var clients = new HashMap<String, TreeItem<LogComponent>>();  // map of client name to its TreeItem
                 try {
-                    logFile.populateDevices((c, d) -> {
+                    logFile.populateDevices(line -> {
                         // Make sure client added only once
-                        TreeItem<LogComponent> clientItem = clients.get(c);
+                        TreeItem<LogComponent> clientItem = clients.get(line.client);
                         if (clientItem == null) {
-                            clientItem = new TreeItem<>(new Client(c));
-                            clients.put(c, clientItem);
+                            clientItem = new TreeItem<>(new Client(line.client));
+                            clients.put(line.client, clientItem);
                             fileItem.getChildren().add(clientItem);
                         }
-                        clientItem.getChildren().add(new TreeItem<LogComponent>(d));
-/*                        c -> {
-                            item.getChildren().add(new TreeItem<LogComponent>(c));
-                        }, d -> {
-                            //item.getChildren().add(new TreeItem<LogComponent>(d));
-*/                        });
+                        clientItem.getChildren().add(new TreeItem<LogComponent>(new CashDevice(line)));
+                    });
                 } catch (IOException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
@@ -134,8 +129,16 @@ public class App extends Application {
     @Override
     public void start(Stage stage) {
         this.stage = stage; // this is needed for dialogs...
+        stage.setOnCloseRequest(e -> {
+            shutdown();
+        });
         stage.setScene(scene);
         stage.show();
+    }
+
+    private void shutdown() {
+        Logger.info("Shutting down.");
+        Exec.getService().shutdownNow();
     }
 
     public static void main(String[] args) {
