@@ -19,7 +19,7 @@ public class S4LogFile extends LogComponent {
     private final File file;
 
     public S4LogFile(File file) throws FileNotFoundException {
-        super(Type.FILE, file.getName());
+        super(file.getName());
 
         this.file = file;
         if (!file.isFile()) {

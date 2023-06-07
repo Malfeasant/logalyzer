@@ -6,7 +6,7 @@ package us.malfeasant.logalyzer;
 public class Client extends LogComponent {
 
     public Client(String name) {
-        super(Type.CLIENT, name);
+        super(name);
     }
 
     @Override

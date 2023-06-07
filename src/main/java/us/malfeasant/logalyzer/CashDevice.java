@@ -4,7 +4,7 @@ public class CashDevice extends LogComponent {
     private final String deviceIp;
     
     CashDevice(DeviceLine line) {
-        super(Type.DEVICE, line.deviceId);
+        super(line.deviceId);
         
         deviceIp = line.deviceIp;
     }

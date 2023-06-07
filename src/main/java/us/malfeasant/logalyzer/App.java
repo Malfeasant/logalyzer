@@ -15,7 +15,6 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.input.DragEvent;
@@ -94,25 +93,25 @@ public class App extends Application {
     }
 
     private void open(List<File> files) {
-        TreeItem<LogComponent> root = new TreeItem<LogComponent>(null);
+        var root = new LogItem(null);
         deviceTree.setRoot(root);
         deviceTree.setShowRoot(false);
         for (var f : files) {
             try {
                 var logFile = new S4LogFile(f);
-                TreeItem<LogComponent> fileItem = new TreeItem<LogComponent>(logFile);
+                var fileItem = new LogItem(logFile);
                 root.getChildren().add(fileItem);
-                var clients = new HashMap<String, TreeItem<LogComponent>>();  // map of client name to its TreeItem
+                var clients = new HashMap<String, LogItem>();  // map of client name to its TreeItem
                 try {
                     logFile.populateDevices(line -> {
                         // Make sure client added only once
-                        TreeItem<LogComponent> clientItem = clients.get(line.client);
+                        var clientItem = clients.get(line.client);
                         if (clientItem == null) {
-                            clientItem = new TreeItem<>(new Client(line.client));
+                            clientItem = new LogItem(new Client(line.client));
                             clients.put(line.client, clientItem);
                             fileItem.getChildren().add(clientItem);
                         }
-                        clientItem.getChildren().add(new TreeItem<LogComponent>(new CashDevice(line)));
+                        clientItem.getChildren().add(new LogItem(new CashDevice(line)));
                     });
                 } catch (IOException e) {
                     // TODO Auto-generated catch block
