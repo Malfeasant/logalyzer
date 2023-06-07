@@ -3,7 +3,8 @@ package us.malfeasant.logalyzer;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.RandomAccessFile;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.function.Consumer;
 
 import org.tinylog.Logger;
@@ -40,8 +41,9 @@ public class S4LogFile extends LogComponent {
             @Override
             protected Integer call() throws FileNotFoundException, IOException {
                 int count = 0;
-                try (var raf = new RandomAccessFile(file, "r")) {
-                    for (var line = raf.readLine(); line != null; line = raf.readLine()) {
+//                try (var readFile = new RandomAccessFile(file, "r")) {
+                try (var readFile = Files.newBufferedReader(file.toPath(), StandardCharsets.US_ASCII)) {
+                    for (var line = readFile.readLine(); line != null; line = readFile.readLine()) {
                         if (isCancelled() || Thread.interrupted()) return -1;
                         
                         if (line.contains(", Device - ")) {
