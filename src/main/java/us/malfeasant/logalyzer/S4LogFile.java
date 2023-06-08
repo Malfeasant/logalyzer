@@ -34,6 +34,46 @@ public class S4LogFile extends LogComponent {
         return "File: " + file.getName();
     }
 
+    /**
+     * Gets things like the s4 version, which core is selected...  
+     * @param app Allows this method to set properties on the App...
+     */
+    void getServerInfo(App app) {
+        // To avoid bogging down the JavaFX event thread while the file is read and parsed,
+        // we use a single worker thread.
+        Exec.getService().submit(new Task<>() {
+            @Override
+            protected Integer call() throws FileNotFoundException, IOException {
+                int count = 0;
+                try (var readFile = Files.newBufferedReader(file.toPath(), StandardCharsets.US_ASCII)) {
+                    for (var line = readFile.readLine(); line != null; line = readFile.readLine()) {
+                        if (isCancelled() || Thread.interrupted()) return -1;
+                        
+                        if (line.contains("CFMS4Version is CFM S4")) {
+                            var idx = line.indexOf("CFMS4Version is CFM S4") + 22;
+                            var text = line.substring(idx);
+                            Platform.runLater(() -> {
+                                app.versionProperty.set(text);
+                            });
+                            count++;
+                        } else if (line.contains("Core Application : ")) {
+                            var start = line.indexOf("Core Application : ") + 19;
+                            var end = line.indexOf("Core Provider : "); // + 16;
+                            var text = line.substring(start, end);
+                            Platform.runLater(() -> {
+                                app.coreProperty.set(text);
+                            });
+                            count++;
+                        }
+
+                        if (count > 2) break;   // don't want to keep reading if we have all we need...
+                    }
+                }
+                return count;
+            }
+        });
+    }
+
     void populateDevices(Consumer<DeviceLine> dlConsumer) throws IOException {
         // To avoid bogging down the JavaFX event thread while the file is read and parsed,
         // we use a single worker thread.
@@ -41,7 +81,6 @@ public class S4LogFile extends LogComponent {
             @Override
             protected Integer call() throws FileNotFoundException, IOException {
                 int count = 0;
-//                try (var readFile = new RandomAccessFile(file, "r")) {
                 try (var readFile = Files.newBufferedReader(file.toPath(), StandardCharsets.US_ASCII)) {
                     for (var line = readFile.readLine(); line != null; line = readFile.readLine()) {
                         if (isCancelled() || Thread.interrupted()) return -1;

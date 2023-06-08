@@ -9,9 +9,13 @@ import java.util.List;
 import org.tinylog.Logger;
 
 import javafx.application.Application;
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.event.ActionEvent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
@@ -21,6 +25,8 @@ import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
@@ -33,12 +39,35 @@ public class App extends Application {
 
     private final TreeView<LogComponent> deviceTree = new TreeView<>();
 
+    // properties to display a header
+    public final StringProperty versionProperty = new SimpleStringProperty();
+    public final StringProperty coreProperty = new SimpleStringProperty();
+
     public App() {
         BorderPane pane = new BorderPane();
         pane.setLeft(deviceTree);
         pane.setOnDragOver(e -> handleDragOver(e));
         pane.setOnDragDropped(e -> handleDrop(e));
-        pane.setTop(createMenu());
+        
+        var versionLabel = new Label();
+        versionLabel.textProperty().bind(
+            Bindings.concat("S4 Version: ",
+                Bindings.when(
+                    Bindings.isNotNull(versionProperty))
+                        .then(versionProperty)
+                        .otherwise("No file.")));
+        var coreLabel = new Label();
+        coreLabel.textProperty().bind(
+            Bindings.concat("S4 Version: ",
+                Bindings.when(
+                    Bindings.isNotNull(coreProperty))
+                        .then(coreProperty)
+                        .otherwise("No file.")));
+
+        var header = new HBox(versionLabel, coreLabel);
+        var top = new VBox(createMenu(), header);
+        pane.setTop(top);
+
         scene = new Scene(pane);
         deviceTree.setCellFactory(LogComponent.getCellFactory());
     }
@@ -103,6 +132,8 @@ public class App extends Application {
                 root.getChildren().add(fileItem);
                 var clients = new HashMap<String, LogItem>();  // map of client name to its TreeItem
                 try {
+                    // setup header- note, in the case of multiple files, last one wins.  TODO?
+                    logFile.getServerInfo(this);
                     logFile.populateDevices(line -> {
                         // Make sure client added only once
                         var clientItem = clients.get(line.client);
