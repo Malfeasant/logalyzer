@@ -58,7 +58,7 @@ public class App extends Application {
                         .otherwise("No file.")));
         var coreLabel = new Label();
         coreLabel.textProperty().bind(
-            Bindings.concat("S4 Version: ",
+            Bindings.concat("Core: ",
                 Bindings.when(
                     Bindings.isNotNull(coreProperty))
                         .then(coreProperty)
