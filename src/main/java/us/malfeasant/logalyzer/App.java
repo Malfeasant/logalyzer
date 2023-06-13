@@ -19,6 +19,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.input.DragEvent;
@@ -72,12 +73,21 @@ public class App extends Application {
         deviceTree.setCellFactory(LogComponent.getCellFactory());
     }
 
+    private void closeAll() {
+        deviceTree.setRoot(null);   // I think this will free all items?
+        // TODO anything else?
+    }
+
     private MenuBar createMenu() {
         MenuItem open = new MenuItem("Open...");
+        MenuItem close = new MenuItem("Close");
+        MenuItem exit = new MenuItem("Exit");
         Menu file = new Menu("File");
-        file.getItems().addAll(open);
+        file.getItems().addAll(open, close, new SeparatorMenuItem(), exit);
         MenuBar menuBar = new MenuBar(file);
         open.setOnAction(e -> showChooser(e));
+        close.setOnAction(e -> closeAll());
+        exit.setOnAction(e -> shutdown());
         return menuBar;
     }
 
@@ -169,6 +179,7 @@ public class App extends Application {
     private void shutdown() {
         Logger.info("Shutting down.");
         Exec.getService().shutdownNow();
+        stage.close();
     }
 
     public static void main(String[] args) {
