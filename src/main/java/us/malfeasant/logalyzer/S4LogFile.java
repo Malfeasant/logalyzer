@@ -50,8 +50,10 @@ public class S4LogFile extends LogComponent {
                         if (isCancelled() || Thread.interrupted()) return -1;
                         
                         if (line.contains("CFMS4Version is CFM S4")) {
-                            var idx = line.indexOf("CFMS4Version is CFM S4") + 22;
-                            var text = line.substring(idx);
+                            var idx = line.indexOf("CFMS4Version is CFM S4") + 23;
+                            var text = line.substring(idx).split(" ")[0]; // Dirty hack
+                            // because we started adding spaces & identifier to log lines
+                            // ca 23.something so can't just go 'til EOL...
                             Platform.runLater(() -> {
                                 app.versionProperty.set(text);
                             });
