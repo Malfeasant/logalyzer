@@ -26,7 +26,6 @@ import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -65,7 +64,9 @@ public class App extends Application {
                         .then(coreProperty)
                         .otherwise("No file.")));
 
-        var header = new HBox(versionLabel, coreLabel);
+        var header = new BorderPane();
+        header.setLeft(versionLabel);
+        header.setRight(coreLabel);
         var top = new VBox(createMenu(), header);
         pane.setTop(top);
 
