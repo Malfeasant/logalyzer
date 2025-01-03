@@ -46,13 +46,13 @@ public class S4LogFile extends LogComponent {
             @Override
             protected Integer call() throws FileNotFoundException, IOException {
                 // First, get number of lines in file- should be relatively quick no matter how large...
-                long lineCount;
+            /*    long lineCount;
                 try (var readFile = Files.lines(file.toPath(), StandardCharsets.US_ASCII)) {
                     lineCount = readFile.count();
                 }
                 Platform.runLater(() -> {
                     app.lineCountProperty.set(Long.toString(lineCount));
-                });
+                });*/ // TODO takes too long- better way?  Or replace with file size?
 
                 // Next, grab the S4 version and Core-
                 int count = 0;  // No telling where in the file the version and core lines will be-
@@ -113,7 +113,7 @@ public class S4LogFile extends LogComponent {
                 }
                 var deviceCount = count;    // needs to be effectively final...
                 Platform.runLater(() -> {
-                    app.deviceCountProperty.set(Long.toString(deviceCount));
+                    app.deviceCountProperty.set(Integer.toString(deviceCount));
                 });
 
                 Logger.debug("Added {} devices.", count);

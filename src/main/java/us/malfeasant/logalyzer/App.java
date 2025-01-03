@@ -73,7 +73,7 @@ public class App extends Application {
                 Bindings.when(
                     Bindings.isNotNull(lineCountProperty))
                         .then(lineCountProperty)
-                        .otherwise("No file.")));
+                        .otherwise("Coming soon..."))); // TODO takes too long...
         var deviceCountLabel = new Label();
         deviceCountLabel.textProperty().bind(
             Bindings.concat("Devices: ",
