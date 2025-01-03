@@ -18,11 +18,13 @@ import javafx.concurrent.Task;
  */
 public class S4LogFile extends LogComponent {
     private final File file;
+    private final App app;  // so we can poke at App's properties
 
-    public S4LogFile(File file) throws FileNotFoundException {
+    public S4LogFile(App app, File file) throws FileNotFoundException {
         super(file.getName());
 
         this.file = file;
+        this.app = app;
         if (!file.isFile()) {
             throw new FileNotFoundException("File " + file + " is not readable or does not exist.");
         }
@@ -36,14 +38,23 @@ public class S4LogFile extends LogComponent {
 
     /**
      * Gets things like the s4 version, which core is selected...  
-     * @param app Allows this method to set properties on the App...
      */
-    void getServerInfo(App app) {
+    void getServerInfo() {
         // To avoid bogging down the JavaFX event thread while the file is read and parsed,
         // we use a single worker thread.
         Exec.getService().submit(new Task<>() {
             @Override
             protected Integer call() throws FileNotFoundException, IOException {
+                // First, get number of lines in file- should be relatively quick no matter how large...
+                long lineCount;
+                try (var readFile = Files.lines(file.toPath(), StandardCharsets.US_ASCII)) {
+                    lineCount = readFile.count();
+                }
+                Platform.runLater(() -> {
+                    app.lineCountProperty.set(Long.toString(lineCount));
+                });
+
+                // Next, grab the S4 version and Core-
                 int count = 0;  // No telling where in the file the version and core lines will be-
                 // can easily be thousands of lines in- so we count matches...
                 try (var readFile = Files.newBufferedReader(file.toPath(), StandardCharsets.US_ASCII)) {
@@ -100,6 +111,11 @@ public class S4LogFile extends LogComponent {
                         }
                     }
                 }
+                var deviceCount = count;    // needs to be effectively final...
+                Platform.runLater(() -> {
+                    app.deviceCountProperty.set(Long.toString(deviceCount));
+                });
+
                 Logger.debug("Added {} devices.", count);
                 return count;
             }

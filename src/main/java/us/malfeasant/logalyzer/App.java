@@ -42,6 +42,9 @@ public class App extends Application {
     // properties to display a header
     public final StringProperty versionProperty = new SimpleStringProperty();
     public final StringProperty coreProperty = new SimpleStringProperty();
+    // and footer
+    public final StringProperty lineCountProperty = new SimpleStringProperty();
+    public final StringProperty deviceCountProperty = new SimpleStringProperty();
 
     public App() {
         BorderPane pane = new BorderPane();
@@ -64,11 +67,31 @@ public class App extends Application {
                         .then(coreProperty)
                         .otherwise("No file.")));
 
+        var lineCountLabel = new Label();
+        lineCountLabel.textProperty().bind(
+            Bindings.concat("File lines: ",
+                Bindings.when(
+                    Bindings.isNotNull(lineCountProperty))
+                        .then(lineCountProperty)
+                        .otherwise("No file.")));
+        var deviceCountLabel = new Label();
+        deviceCountLabel.textProperty().bind(
+            Bindings.concat("Devices: ",
+                Bindings.when(
+                    Bindings.isNotNull(deviceCountProperty))
+                        .then(deviceCountProperty)
+                        .otherwise("No file.")));
+                
         var header = new BorderPane();
         header.setLeft(versionLabel);
         header.setRight(coreLabel);
         var top = new VBox(createMenu(), header);
         pane.setTop(top);
+
+        var footer = new BorderPane();
+        footer.setLeft(lineCountLabel);
+        footer.setRight(deviceCountLabel);
+        pane.setBottom(footer);
 
         scene = new Scene(pane);
         deviceTree.setCellFactory(LogComponent.getCellFactory());
@@ -138,13 +161,13 @@ public class App extends Application {
         deviceTree.setShowRoot(false);
         for (var f : files) {
             try {
-                var logFile = new S4LogFile(f);
+                var logFile = new S4LogFile(this, f);
                 var fileItem = new LogItem(logFile);
                 root.getChildren().add(fileItem);
                 var clients = new HashMap<String, LogItem>();  // map of client name to its TreeItem
                 try {
                     // setup header- note, in the case of multiple files, last one wins.  TODO?
-                    logFile.getServerInfo(this);
+                    logFile.getServerInfo();
                     logFile.populateDevices(line -> {
                         // Make sure client added only once
                         var clientItem = clients.get(line.client);
