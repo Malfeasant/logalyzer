@@ -44,7 +44,8 @@ public class S4LogFile extends LogComponent {
         Exec.getService().submit(new Task<>() {
             @Override
             protected Integer call() throws FileNotFoundException, IOException {
-                int count = 0;
+                int count = 0;  // No telling where in the file the version and core lines will be-
+                // can easily be thousands of lines in- so we count matches...
                 try (var readFile = Files.newBufferedReader(file.toPath(), StandardCharsets.US_ASCII)) {
                     for (var line = readFile.readLine(); line != null; line = readFile.readLine()) {
                         if (isCancelled() || Thread.interrupted()) return -1;
@@ -58,17 +59,19 @@ public class S4LogFile extends LogComponent {
                                 app.versionProperty.set(text);
                             });
                             count++;
+                            Logger.debug("Got version {}", text);
                         } else if (line.contains("Core Application : ")) {
                             var start = line.indexOf("Core Application : ") + 19;
                             var end = line.indexOf("Core Provider : "); // + 16;
-                            var text = line.substring(start, end);
+                            var text = line.substring(start, end).trim();   // sometimes ends w/ spaces...
                             Platform.runLater(() -> {
                                 app.coreProperty.set(text);
                             });
                             count++;
+                            Logger.debug("Got Core name {}", text);
                         }
 
-                        if (count > 2) break;   // don't want to keep reading if we have all we need...
+                        if (count >= 2) break;   // don't want to keep reading if we have all we need...
                     }
                 }
                 return count;
