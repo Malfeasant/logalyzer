@@ -97,24 +97,29 @@ public class S4LogFile extends LogComponent {
             @Override
             protected Integer call() throws FileNotFoundException, IOException {
                 int count = 0;
+                int sinceLast = 0;  // keep track of how many lines we've seen without a device
+                // since devices are listed near the beginning of the file, no need to read all the
+                // way to the end- but, since there can be non-device lines in between, we can't
+                // just quit after seeing lines without devices...
                 try (var readFile = Files.newBufferedReader(file.toPath(), StandardCharsets.US_ASCII)) {
                     for (var line = readFile.readLine(); line != null; line = readFile.readLine()) {
                         if (isCancelled() || Thread.interrupted()) return -1;
                         
                         if (line.contains(", Device - ")) {
+                            ++count;
+                            var finalCount = count; // must be effectively final to pass to another thread...
                             var devLine = new DeviceLine(line);
                             // Pass it back to Event thread
                             Platform.runLater(() -> {
                                 dlConsumer.accept(devLine);
+                                app.deviceCountProperty.set(Integer.toString(finalCount));
                             });
-                            ++count;
+                        } else if (count > 0) {
+                            sinceLast++;
                         }
+                        if (sinceLast > 500) break;
                     }
                 }
-                var deviceCount = count;    // needs to be effectively final...
-                Platform.runLater(() -> {
-                    app.deviceCountProperty.set(Integer.toString(deviceCount));
-                });
 
                 Logger.debug("Added {} devices.", count);
                 return count;

@@ -99,6 +99,11 @@ public class App extends Application {
 
     private void closeAll() {
         deviceTree.setRoot(null);   // I think this will free all items?
+        versionProperty.set(null);
+        coreProperty.set(null); // null property triggers "no file open" label...
+        deviceCountProperty.set(null);
+        lineCountProperty.set(null);
+
         // TODO anything else?
     }
 
@@ -156,6 +161,9 @@ public class App extends Application {
     }
 
     private void open(List<File> files) {
+        // First, unload whatever we have loaded-
+        closeAll();
+        // then, start building new tree...
         var root = new LogItem(null);
         deviceTree.setRoot(root);
         deviceTree.setShowRoot(false);
