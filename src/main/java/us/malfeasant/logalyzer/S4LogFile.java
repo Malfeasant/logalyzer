@@ -10,6 +10,10 @@ import java.util.function.Consumer;
 import org.tinylog.Logger;
 
 import javafx.application.Platform;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.concurrent.Task;
 
 /**
@@ -18,13 +22,15 @@ import javafx.concurrent.Task;
  */
 public class S4LogFile extends LogComponent {
     private final File file;
-    private final App app;  // so we can poke at App's properties
 
-    public S4LogFile(App app, File file) throws FileNotFoundException {
+    public final IntegerProperty deviceCountProperty = new SimpleIntegerProperty();
+    public final StringProperty versionProperty = new SimpleStringProperty();
+    public final StringProperty coreProperty = new SimpleStringProperty();
+
+    public S4LogFile(File file) throws FileNotFoundException {
         super(file.getName());
 
         this.file = file;
-        this.app = app;
         if (!file.isFile()) {
             throw new FileNotFoundException("File " + file + " is not readable or does not exist.");
         }
@@ -67,7 +73,7 @@ public class S4LogFile extends LogComponent {
                             // because we started adding spaces & identifier to log lines
                             // ca 23.something so can't just go 'til EOL...
                             Platform.runLater(() -> {
-                                app.versionProperty.set(text);
+                                versionProperty.set(text);
                             });
                             count++;
                             Logger.debug("Got version {}", text);
@@ -76,7 +82,7 @@ public class S4LogFile extends LogComponent {
                             var end = line.indexOf("Core Provider : "); // + 16;
                             var text = line.substring(start, end).trim();   // sometimes ends w/ spaces...
                             Platform.runLater(() -> {
-                                app.coreProperty.set(text);
+                                coreProperty.set(text);
                             });
                             count++;
                             Logger.debug("Got Core name {}", text);
@@ -112,7 +118,7 @@ public class S4LogFile extends LogComponent {
                             // Pass it back to Event thread
                             Platform.runLater(() -> {
                                 dlConsumer.accept(devLine);
-                                app.deviceCountProperty.set(Integer.toString(finalCount));
+                                deviceCountProperty.set(finalCount);
                             });
                         } else if (count > 0) {
                             sinceLast++;

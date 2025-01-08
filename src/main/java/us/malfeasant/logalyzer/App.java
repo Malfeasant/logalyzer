@@ -99,9 +99,14 @@ public class App extends Application {
 
     private void closeAll() {
         deviceTree.setRoot(null);   // I think this will free all items?
-        versionProperty.set(null);
-        coreProperty.set(null); // null property triggers "no file open" label...
+        
+        versionProperty.unbind();   // unbind leaves it with last value...
+        versionProperty.set(null);  // null property triggers "no file open" label...
+        coreProperty.unbind();
+        coreProperty.set(null);
+        deviceCountProperty.unbind();
         deviceCountProperty.set(null);
+        lineCountProperty.unbind();
         lineCountProperty.set(null);
 
         // TODO anything else?
@@ -169,7 +174,11 @@ public class App extends Application {
         deviceTree.setShowRoot(false);
         for (var f : files) {
             try {
-                var logFile = new S4LogFile(this, f);
+                var logFile = new S4LogFile(f);
+                deviceCountProperty.bind(Bindings.convert(logFile.deviceCountProperty));
+                versionProperty.bind(logFile.versionProperty);
+                coreProperty.bind(logFile.coreProperty);
+
                 var fileItem = new LogItem(logFile);
                 root.getChildren().add(fileItem);
                 var clients = new HashMap<String, LogItem>();  // map of client name to its TreeItem
