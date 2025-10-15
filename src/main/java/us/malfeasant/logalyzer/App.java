@@ -15,11 +15,13 @@ import javafx.beans.property.StringProperty;
 import javafx.event.ActionEvent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
+import javafx.scene.control.TitledPane;
 import javafx.scene.control.TreeView;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.input.DragEvent;
@@ -93,8 +95,21 @@ public class App extends Application {
         footer.setRight(deviceCountLabel);
         pane.setBottom(footer);
 
+        var timestampButton = new Button("Timestamps");
+        timestampButton.setOnAction((e) -> scanTimes());
+
+        var scanPane = new TitledPane("Quick Scan", timestampButton);
+        pane.setCenter(scanPane);   // TODO this is ugly, but it'll do for now...
+
         scene = new Scene(pane);
         deviceTree.setCellFactory(LogComponent.getCellFactory());
+    }
+
+    private void scanTimes() {
+        // first layer will be log files...
+        deviceTree.getRoot().getChildren().forEach(f -> {
+            
+        });
     }
 
     private void closeAll() {
